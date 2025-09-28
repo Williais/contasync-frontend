@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import axios from '../api/axios.js'
 
 export const UserContext = createContext(null);
 
@@ -12,11 +12,11 @@ export function UserProvider({ children }) {
   // Função para buscar os dados (usuário e categorias)
   const fetchData = async () => {
     try {
-      const resUser = await axios.get('http://localhost:3000/auth/user');
+      const resUser = await axios.get('/auth/user');
       setUsuario(resUser.data);
       
       // Se o usuário foi encontrado, busca as categorias
-      const resCategorias = await axios.get('http://localhost:3000/categorias');
+      const resCategorias = await axios.get('/categorias');
       setCategorias(resCategorias.data);
 
     } catch (error) {

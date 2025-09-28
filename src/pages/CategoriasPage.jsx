@@ -1,6 +1,6 @@
 // src/pages/CategoriasPage.jsx
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import axios from '../api/axios.js'
 import { UserContext } from '../contexts/UserContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { Box, Typography, List, ListItem, ListItemText, Paper, CircularProgress, IconButton, Dialog, DialogTitle, DialogContent } from '@mui/material';
@@ -28,7 +28,7 @@ function CategoriasPage() {
     if (usuario) {
       const buscarCategorias = async () => {
         try {
-          const res = await axios.get('http://localhost:3000/categorias');
+          const res = await axios.get('/categorias');
           setCategorias(res.data);
         } catch (error) {
           console.error('Erro ao buscar categorias:', error);
@@ -78,7 +78,7 @@ function CategoriasPage() {
   const handleConfirmarExclusao = async () => {
     const idParaDeletar = dialogExclusao.id;
     try {
-      await axios.delete(`http://localhost:3000/categorias/${idParaDeletar}`);
+      await axios.delete(`/categorias/${idParaDeletar}`);
       setCategorias(categoriasAtuais => categoriasAtuais.filter(c => c.id !== idParaDeletar));
       showNotification('Categoria excluída com sucesso!', 'success');
     } catch (error) {

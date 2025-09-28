@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import axios from '../api/axios.js'
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { useNotification } from '../contexts/NotificationContext';
 
@@ -15,7 +15,7 @@ function FormularioCategoria({ onCategoriaAdicionada }) {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:3000/categorias', { nome, tipo });
+      const response = await axios.post('/categorias', { nome, tipo })
       showNotification('Categoria criada com sucesso!', 'success');
       onCategoriaAdicionada(response.data);
       setNome('');

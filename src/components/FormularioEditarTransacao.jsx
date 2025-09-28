@@ -1,6 +1,6 @@
 // src/components/FormularioEditarTransacao.jsx
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios.js'
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
 import { useNotification } from '../contexts/NotificationContext';
 
@@ -17,7 +17,7 @@ function FormularioEditarTransacao({ transacaoParaEditar, onEdicaoConcluida }) {
   const { showNotification } = useNotification();
 
   useEffect(() => {
-    axios.get('http://localhost:3000/categorias')
+    axios.get('/categorias')
       .then(response => setCategorias(response.data))
       .catch(e => console.error('Erro ao buscar as Categorias: ', e));
   }, []);
@@ -46,7 +46,7 @@ function FormularioEditarTransacao({ transacaoParaEditar, onEdicaoConcluida }) {
     };
 
     try {
-      const response = await axios.put(`http://localhost:3000/transacoes/${transacaoParaEditar.id}`, transacaoAtualizada);
+      const response = await axios.put(`/transacoes/${transacaoParaEditar.id}`, transacaoAtualizada);
       showNotification('Transação atualizada com sucesso!', 'success');
       onEdicaoConcluida(response.data);
     } catch (error) {

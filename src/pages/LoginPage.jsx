@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import GoogleIcon from '@mui/icons-material/Google';
 
 function LoginPage() {
-  const googleLoginUrl = 'http://localhost:3000/auth/google';
+  const googleLoginUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/google`
 
   return (
     // Box é como uma 'div' superpoderosa para layout.

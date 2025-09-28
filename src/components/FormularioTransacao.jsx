@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from '../api/axios.js'
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
 import { useNotification } from '../contexts/NotificationContext';
 
@@ -29,7 +29,7 @@ function FormularioTransacao({ onTransacaoAdicionada, categorias }) { // Recebe 
         };
 
         try {
-            const response = await axios.post('http://localhost:3000/transacoes', novaTransacao);
+            const response = await axios.post('/transacoes', novaTransacao);
             onTransacaoAdicionada(response.data);
             setDescricao(''); setValor(''); setDataTransacao(''); setCategoriaId('');
             setTipoTransacao('despesa'); setTipoDespesa('fixa'); setDataVencimento(''); setPrecisaAviso(false);

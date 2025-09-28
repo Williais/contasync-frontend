@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useContext } from 'react';
-import axios from 'axios';
+import axios from '../api/axios.js'
 import { UserContext, useUser } from '../contexts/UserContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { 
@@ -49,10 +49,7 @@ function DashboardPage() {
           if (anoFiltro) params.append('ano', anoFiltro);
           if (mesFiltro) params.append('mes', mesFiltro);
 
-          const url = `http://localhost:3000/transacoes?${params.toString()}`
-          console.log("Buscando dados de:", url)
-
-          const res = await axios.get(url);
+          const res = await axios.get('/transacoes', { params: params });
           setTransacoes(res.data);
         } catch (error) {
           console.error('Erro ao buscar transações:', error);
@@ -89,7 +86,7 @@ function DashboardPage() {
   const handleConfirmarExclusao = async () => {
     const idParaDeletar = dialogExclusao.id;
     try {
-      await axios.delete(`http://localhost:3000/transacoes/${idParaDeletar}`);
+      await axios.delete(`/transacoes/${idParaDeletar}`)
       setTransacoes(transacoesAtuais => transacoesAtuais.filter(t => t.id !== idParaDeletar));
       showNotification('Transação excluída com sucesso!', 'success');
     } catch (error) {

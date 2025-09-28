@@ -1,9 +1,7 @@
-// src/components/ResumoCard.jsx
 import { Paper, Typography, Box, Divider } from '@mui/material';
 
-// O componente agora aceita uma prop opcional 'detalhe'
 function ResumoCard({ titulo, valor, cor, detalhe }) {
-  // Função para formatar o valor como moeda
+
   const formatarMoeda = (num) => num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   return (
@@ -16,7 +14,6 @@ function ResumoCard({ titulo, valor, cor, detalhe }) {
       </Typography>
       
       {/* --- NOVIDADE AQUI --- */}
-      {/* Renderiza a seção de detalhe APENAS se a prop 'detalhe' for fornecida e tiver um valor > 0 */}
       {detalhe && detalhe.valor > 0 && (
         <>
           <Divider sx={{ my: 1 }} />

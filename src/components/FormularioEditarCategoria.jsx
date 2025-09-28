@@ -1,6 +1,6 @@
 // src/components/FormularioEditarCategoria.jsx
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../api/axios.js'
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { useNotification } from '../contexts/NotificationContext'; // 1. Importa o hook
 
@@ -19,7 +19,7 @@ function FormularioEditarCategoria({ categoriaParaEditar, onEdicaoConcluida }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.put(`http://localhost:3000/categorias/${categoriaParaEditar.id}`, {
+      const response = await axios.put(`/categorias/${categoriaParaEditar.id}`, {
         nome: nome,
         tipo: tipo,
       });

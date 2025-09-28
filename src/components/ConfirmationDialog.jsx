@@ -1,4 +1,3 @@
-// src/components/ConfirmationDialog.jsx
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 function ConfirmationDialog({ open, onClose, onConfirm, title, message }) {
