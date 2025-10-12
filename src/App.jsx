@@ -13,16 +13,11 @@ function App() {
         <UserProvider>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            
-            {/* Rota "coringa" que aplica o Layout a todas as páginas internas */}
-            <Route 
-              path="/*"
-              element={
+            <Route path="/*" element={
                 <Layout>
                   <Routes>
                     <Route path="/" element={<DashboardPage />} />
                     <Route path="/categorias" element={<CategoriasPage />} />
-                    {/* Futuras rotas protegidas podem ser adicionadas aqui */}
                   </Routes>
                 </Layout>
               } 
@@ -33,5 +28,4 @@ function App() {
     </BrowserRouter>
   );
 }
-
 export default App;

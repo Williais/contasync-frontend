@@ -1,6 +1,6 @@
 // src/pages/CategoriasPage.jsx
 import { useState, useEffect, useContext } from 'react';
-import axios from '../api/axios.js'
+import { useUser } from '../contexts/UserContext';
 import { UserContext } from '../contexts/UserContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { Box, Typography, List, ListItem, ListItemText, Paper, CircularProgress, IconButton, Dialog, DialogTitle, DialogContent } from '@mui/material';
@@ -11,51 +11,18 @@ import FormularioCategoria from '../components/FormularioCategoria';
 import FormularioEditarCategoria from '../components/FormularioEditarCategoria';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 
-
 function CategoriasPage() {
-  const [categorias, setCategorias] = useState([]);
-  const { usuario, loading } = useContext(UserContext);
+  // O 'categorias' e 'setCategorias' agora vem do contexto global!
+  const { loading, categorias, setCategorias } = useUser();
   const { showNotification } = useNotification();
-  
-
-  // Estados para os modais
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState(null);
   const [dialogExclusao, setDialogExclusao] = useState({ open: false, id: null });
 
-  // Busca as categorias iniciais
-  useEffect(() => {
-    if (usuario) {
-      const buscarCategorias = async () => {
-        try {
-          const res = await axios.get('/categorias');
-          setCategorias(res.data);
-        } catch (error) {
-          console.error('Erro ao buscar categorias:', error);
-          showNotification('Erro ao buscar categorias.', 'error');
-        }
-      };
-      buscarCategorias();
-    }
-  }, [usuario, showNotification]);
-
-  // Handlers para os formulários
   const handleCategoriaAdicionada = (novaCategoria) => {
     setCategorias(categoriasAtuais => [...categoriasAtuais, novaCategoria]);
   };
 
-  
-
-  const handleEdicaoConcluida = (categoriaAtualizada) => {
-    setCategorias(categoriasAtuais => 
-      categoriasAtuais.map(cat => 
-        cat.id === categoriaAtualizada.id ? categoriaAtualizada : cat
-      )
-    );
-    handleFecharModalEdicao();
-  };
-
-  // Handlers para o modal de edição
   const handleAbrirModalEdicao = (categoria) => {
     setCategoriaSelecionada(categoria);
     setModalEdicaoAberto(true);
@@ -66,26 +33,28 @@ function CategoriasPage() {
     setCategoriaSelecionada(null);
   };
 
-  // Handlers para o diálogo de exclusão
-  const handleAbrirDialogoExclusao = (id) => {
-    setDialogExclusao({ open: true, id: id });
-  };
-
-  const handleFecharDialogoExclusao = () => {
-    setDialogExclusao({ open: false, id: null });
+  const handleEdicaoConcluida = (catAtualizada) => {
+    setCategorias(catsAtuais => catsAtuais.map(c => c.id === catAtualizada.id ? catAtualizada : c));
+    setModalEdicaoAberto(false);
   };
 
   const handleConfirmarExclusao = async () => {
     const idParaDeletar = dialogExclusao.id;
     try {
-      await axios.delete(`/categorias/${idParaDeletar}`);
-      setCategorias(categoriasAtuais => categoriasAtuais.filter(c => c.id !== idParaDeletar));
+      // Lógica de exclusão com Supabase
+      const { error } = await supabase
+        .from('categorias')
+        .delete()
+        .eq('id', idParaDeletar);
+
+      if (error) throw error;
+      
+      setCategorias(catsAtuais => catsAtuais.filter(c => c.id !== idParaDeletar));
       showNotification('Categoria excluída com sucesso!', 'success');
     } catch (error) {
-      console.error('Erro ao excluir categoria:', error);
-      showNotification('Não foi possível excluir a categoria.', 'error');
+      showNotification(`Não foi possível excluir a categoria: ${error.message}`, 'error');
     } finally {
-      handleFecharDialogoExclusao();
+      setDialogExclusao({ open: false, id: null });
     }
   };
 

@@ -1,12 +1,23 @@
 // src/pages/LoginPage.jsx
+import { supabase } from '../supabaseClient';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import GoogleIcon from '@mui/icons-material/Google';
 
 function LoginPage() {
-  const googleLoginUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/google`
-
+  // Função que será chamada pelo botão
+  const handleLogin = async () => {
+    try {
+      // A função do Supabase que cuida de todo o fluxo de login com o Google
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error("Erro no login com Google:", error);
+    }
+  };
   return (
     // Box é como uma 'div' superpoderosa para layout.
     // 'display: flex', 'alignItems', etc., são propriedades (props) que controlam o CSS.
@@ -35,7 +46,7 @@ function LoginPage() {
           color="primary" 
           size="large"
           startIcon={<GoogleIcon />}
-          href={googleLoginUrl} // Usamos 'href' para que ele funcione como um link
+          onClick={handleLogin} // Usamos 'href' para que ele funcione como um link
           sx={{ mt: 4 }} // 'sx' é uma prop para adicionar CSS customizado facilmente
         >
           Entrar com Google

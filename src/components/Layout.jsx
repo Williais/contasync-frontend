@@ -1,7 +1,8 @@
 
 import { useContext, useState } from 'react';
+import { supabase } from '../supabaseClient';
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Avatar, Typography, Divider, AppBar, IconButton } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import CategoryIcon from '@mui/icons-material/Category';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -12,15 +13,22 @@ const drawerWidth = 240;
 
 function Layout({ children }) {
   const { usuario } = useUser();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleLogout = () => {
-    window.location.href = 'http://localhost:3000/auth/logout';
-  };
+const handleLogout = async () => {
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        navigate('/login');
+    } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+    }
+};
 
   // Conteúdo da Navbar
   const drawerContent = (

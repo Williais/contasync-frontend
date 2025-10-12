@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import axios from '../api/axios.js'
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { useNotification } from '../contexts/NotificationContext';
 
@@ -15,15 +14,24 @@ function FormularioCategoria({ onCategoriaAdicionada }) {
       return;
     }
     try {
-      const response = await axios.post('/categorias', { nome, tipo })
+      
+      const { data, error } = await supabase
+        .from('categorias')
+        .insert({ nome, tipo })
+        .select()
+        .single();
+
+      if (error) throw error;
+
       showNotification('Categoria criada com sucesso!', 'success');
-      onCategoriaAdicionada(response.data);
+      onCategoriaAdicionada(data);
       setNome('');
     } catch (error) {
       console.error('Erro ao criar categoria:', error);
-      showNotification('Não foi possível criar a categoria.', 'error');
+      showNotification(`Não foi possível criar a categoria: ${error.message}`, 'error');
     }
   };
+
   return (
     <Box 
       component="form" 

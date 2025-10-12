@@ -1,13 +1,12 @@
-// src/components/FormularioEditarCategoria.jsx
 import { useState, useEffect } from 'react';
-import axios from '../api/axios.js'
+import { supabase } from '../supabaseClient';
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-import { useNotification } from '../contexts/NotificationContext'; // 1. Importa o hook
+import { useNotification } from '../contexts/NotificationContext';
 
 function FormularioEditarCategoria({ categoriaParaEditar, onEdicaoConcluida }) {
   const [nome, setNome] = useState('');
   const [tipo, setTipo] = useState('despesa');
-  const { showNotification } = useNotification(); // 2. Pega a função de notificação
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     if (categoriaParaEditar) {
@@ -19,19 +18,20 @@ function FormularioEditarCategoria({ categoriaParaEditar, onEdicaoConcluida }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.put(`/categorias/${categoriaParaEditar.id}`, {
-        nome: nome,
-        tipo: tipo,
-      });
-      
-      // 3. Substitui o alert() pelo showNotification()
-      showNotification('Categoria atualizada com sucesso!', 'success');
-      onEdicaoConcluida(response.data);
+      const { data, error } = await supabase
+        .from('categorias')
+        .update({ nome, tipo })
+        .eq('id', categoriaParaEditar.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
 
+      showNotification('Categoria atualizada com sucesso!', 'success');
+      onEdicaoConcluida(data);
     } catch (error) {
       console.error('Erro ao atualizar categoria:', error);
-      // 3. Substitui o alert() pelo showNotification()
-      showNotification('Não foi possível atualizar a categoria.', 'error');
+      showNotification(`Não foi possível atualizar a categoria: ${error.message}`, 'error');
     }
   };
 
