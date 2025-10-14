@@ -1,12 +1,9 @@
-import { useState, useEffect } from "react";
-import axios from '../api/axios.js'
+import { useState } from "react";
+import { supabase } from '../supabaseClient'; // Usa Supabase
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
 import { useNotification } from '../contexts/NotificationContext';
 
-
-axios.defaults.withCredentials = true;
-// 1. Nome do componente em PascalCase
-function FormularioTransacao({ onTransacaoAdicionada, categorias }) { // Recebe categorias via props
+function FormularioTransacao({ onTransacaoAdicionada, categorias }) {
     const [descricao, setDescricao] = useState('');
     const [valor, setValor] = useState('');
     const [dataTransacao, setDataTransacao] = useState('');
@@ -21,40 +18,50 @@ function FormularioTransacao({ onTransacaoAdicionada, categorias }) { // Recebe 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const novaTransacao = {
-            descricao, valor: parseFloat(valor), data_transacao: dataTransacao,
-            categoria_id: parseInt(categoriaId), tipo_transacao: tipoTransacao,
+            descricao: descricao,
+            valor: parseFloat(valor),
+            data_transacao: dataTransacao,
+            categoria_id: parseInt(categoriaId),
+            tipo_transacao: tipoTransacao,
             tipo_despesa: tipoTransacao === 'despesa' ? tipoDespesa : null,
             data_vencimento: (tipoTransacao === 'despesa' && dataVencimento) ? dataVencimento : null,
             precisa_aviso: tipoTransacao === 'despesa' ? precisaAviso : false,
         };
 
         try {
-            const response = await axios.post('/transacoes', novaTransacao);
-            onTransacaoAdicionada(response.data);
+            // Lógica de criação com Supabase
+            const { data, error } = await supabase
+                .from('transacoes')
+                .insert(novaTransacao)
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            showNotification('Transação criada com sucesso!', 'success');
+            onTransacaoAdicionada(data);
+
+            // Limpando o formulário
             setDescricao(''); setValor(''); setDataTransacao(''); setCategoriaId('');
             setTipoTransacao('despesa'); setTipoDespesa('fixa'); setDataVencimento(''); setPrecisaAviso(false);
-            showNotification('Transação criada com sucesso!', 'success');
-        } catch (e) {
-            console.error('Erro ao criar transação:', e);
-            showNotification('Erro ao criar transação.', 'error');
+        } catch (error) {
+            console.error('Erro ao criar transação:', error);
+            showNotification(`Erro ao criar transação: ${error.message}`, 'error');
         }
     };
     
-     const handleCategoryChange = (event) => {
+    const handleCategoryChange = (event) => {
         const selectedId = event.target.value;
         setCategoriaId(selectedId);
-
         const categoriaSelecionada = categorias.find(cat => cat.id === parseInt(selectedId));
-
         if (categoriaSelecionada) {
             setTipoTransacao(categoriaSelecionada.tipo);
         }
     };
-    
-    // Esta função zera a categoria selecionada se o tipo for mudado manualmente
+
     const handleTypeChange = (event) => {
         setTipoTransacao(event.target.value);
-        setCategoriaId(''); // Limpa a categoria para evitar inconsistências
+        setCategoriaId(''); // Limpa a categoria selecionada para evitar inconsistências
     };
 
     return (

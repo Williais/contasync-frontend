@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from '../supabaseClient';
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { useNotification } from '../contexts/NotificationContext';
 
@@ -14,7 +15,6 @@ function FormularioCategoria({ onCategoriaAdicionada }) {
       return;
     }
     try {
-      
       const { data, error } = await supabase
         .from('categorias')
         .insert({ nome, tipo })
@@ -27,11 +27,10 @@ function FormularioCategoria({ onCategoriaAdicionada }) {
       onCategoriaAdicionada(data);
       setNome('');
     } catch (error) {
-      console.error('Erro ao criar categoria:', error);
       showNotification(`Não foi possível criar a categoria: ${error.message}`, 'error');
     }
   };
-
+  
   return (
     <Box 
       component="form" 

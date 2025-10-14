@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useContext } from 'react';
+import { supabase } from '../supabaseClient';
 import axios from '../api/axios.js'
 import { UserContext, useUser } from '../contexts/UserContext';
 import { useNotification } from '../contexts/NotificationContext';
@@ -21,6 +22,8 @@ import GraficoDespesas from '../components/GraficoDespesas';
 import GraficoBarrasGastosMensais from '../components/GraficoBarrasGastosMensais';
 import GraficoLinhaEvolucao from '../components/GraficoLinhaEvolucao';
 
+
+
 function DashboardPage() {
   const [transacoes, setTransacoes] = useState([]);
   const [modalCriacaoAberto, setModalCriacaoAberto] = useState(false);
@@ -38,43 +41,63 @@ function DashboardPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if(!loading && !usuario) {
-        navigate('/login');
-    }
-
     if (usuario) {
       const buscarTransacoes = async () => {
-        try {
-          const params = new URLSearchParams();
-          if (anoFiltro) params.append('ano', anoFiltro);
-          if (mesFiltro) params.append('mes', mesFiltro);
+        let query = supabase.from('transacoes').select('*');
 
-          const res = await axios.get('/transacoes', { params: params });
-          setTransacoes(res.data);
-        } catch (error) {
-          console.error('Erro ao buscar transações:', error);
-          showNotification('Erro ao carregar transações para este período.', 'error');
+        // Lógica de filtro com Supabase
+        if (anoFiltro && mesFiltro) {
+          const primeiroDia = `${anoFiltro}-${String(mesFiltro).padStart(2, '0')}-01`;
+          const ultimoDia = new Date(anoFiltro, mesFiltro, 0).toISOString().split('T')[0];
+          query = query.gte('data_transacao', primeiroDia).lte('data_transacao', ultimoDia);
+        }
+        
+        query = query.order('data_transacao', { ascending: false });
+
+        const { data, error } = await query;
+        
+        if (error) {
+          showNotification('Erro ao carregar transações.', 'error');
+          console.error("Erro do Supabase:", error);
+        } else {
+          setTransacoes(data);
         }
       };
       buscarTransacoes();
     }
-  }, [usuario, anoFiltro, mesFiltro, loading, navigate, showNotification]);
+  }, [usuario, anoFiltro, mesFiltro, showNotification]);
 
   const handleAplicarFiltro = () => {
     setAnoFiltro(anoSelecionado);
     setMesFiltro(mesSelecionado);
   };
+
   const handleLimparFiltro = () => {
-    setAnoFiltro(null);
+    setAnoFiltro(null); // Limpa o filtro para buscar tudo
     setMesFiltro(null);
-    setAnoSelecionado(new Date().getFullYear());
-    setMesSelecionado(new Date().getMonth() + 1);
+  };
+  
+  // --- LÓGICA DE EXCLUSÃO ATUALIZADA PARA SUPABASE ---
+  const handleConfirmarExclusao = async () => {
+    const idParaDeletar = dialogExclusao.id;
+    try {
+      const { error } = await supabase.from('transacoes').delete().eq('id', idParaDeletar);
+      if (error) throw error;
+
+      setTransacoes(transacoesAtuais => transacoesAtuais.filter(t => t.id !== idParaDeletar));
+      showNotification('Transação excluída com sucesso!', 'success');
+    } catch (error) {
+      showNotification(`Não foi possível excluir a transação: ${error.message}`, 'error');
+    } finally {
+      setDialogExclusao({ open: false, id: null });
+    }
   };
 
   const handleTransacaoAdicionada = (novaTransacao) => {
     setTransacoes(transacoesAtuais => [novaTransacao, ...transacoesAtuais]);
     setModalCriacaoAberto(false);
   };
+
   const handleEdicaoConcluida = (transacaoAtualizada) => {
     setTransacoes(transacoesAtuais => 
       transacoesAtuais.map(trans => 
@@ -83,59 +106,32 @@ function DashboardPage() {
     );
     setModalEdicaoAberto(false);
   };
-  const handleConfirmarExclusao = async () => {
-    const idParaDeletar = dialogExclusao.id;
-    try {
-      await axios.delete(`/transacoes/${idParaDeletar}`)
-      setTransacoes(transacoesAtuais => transacoesAtuais.filter(t => t.id !== idParaDeletar));
-      showNotification('Transação excluída com sucesso!', 'success');
-    } catch (error) {
-      showNotification('Não foi possível excluir a transação.', 'error');
-    } finally {
-      setDialogExclusao({ open: false, id: null });
-    }
-  };
+
   
-  // --- CÁLCULOS MEMORIZADOS PARA OS CARDS ---
   const resumoFinanceiro = useMemo(() => {
-    // Definimos a estrutura inicial do nosso acumulador
-    const resumoInicial = {
-      entradas: 0,
-      saidas: 0,
-      maiorEntrada: { descricao: '-', valor: 0 },
-      maiorSaida: { descricao: '-', valor: 0 },
-    };
-
+    const resumoInicial = { entradas: 0, saidas: 0, maiorEntrada: { descricao: '-', valor: 0 }, maiorSaida: { descricao: '-', valor: 0 } };
     const resumo = transacoes.reduce((acc, transacao) => {
-      const valor = parseFloat(transacao.valor);
-
-      if (transacao.tipo_transacao === 'provento') {
-        acc.entradas += valor;
-        // Se o valor desta transação for maior que a maior entrada já registrada, atualiza.
-        if (valor > acc.maiorEntrada.valor) {
-          acc.maiorEntrada = { descricao: transacao.descricao, valor: valor };
+        const valor = parseFloat(transacao.valor);
+        if (transacao.tipo_transacao === 'provento') {
+            acc.entradas += valor;
+            if (valor > acc.maiorEntrada.valor) { acc.maiorEntrada = { descricao: transacao.descricao, valor: valor }; }
+        } else if (transacao.tipo_transacao === 'despesa') {
+            acc.saidas += valor;
+            if (valor > acc.maiorSaida.valor) { acc.maiorSaida = { descricao: transacao.descricao, valor: valor }; }
         }
-      } else if (transacao.tipo_transacao === 'despesa') {
-        acc.saidas += valor;
-        // Se o valor desta transação for maior que a maior saída já registrada, atualiza.
-        if (valor > acc.maiorSaida.valor) {
-          acc.maiorSaida = { descricao: transacao.descricao, valor: valor };
-        }
-      }
-      return acc;
-    }, resumoInicial); // Usamos nossa estrutura inicial
-
+        return acc;
+    }, resumoInicial);
     const saldo = resumo.entradas - resumo.saidas;
     return { ...resumo, saldo };
   }, [transacoes]);
 
-  // --- FUNÇÕES UTILITÁRIAS ---
   const formatarData = (data) => {
     if (!data) return '';
     const dataObj = new Date(data);
     if (isNaN(dataObj.getTime())) { return 'Data inválida'; }
     return dataObj.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   };
+
 
   const anosDisponiveis = [2025, 2026, 2027, 2028, 2029];
 

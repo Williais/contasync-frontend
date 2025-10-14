@@ -1,59 +1,61 @@
-// src/components/FormularioEditarTransacao.jsx
 import { useState, useEffect } from 'react';
-import axios from '../api/axios.js'
+import { supabase } from '../supabaseClient'; // Usa Supabase
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
 import { useNotification } from '../contexts/NotificationContext';
 
-function FormularioEditarTransacao({ transacaoParaEditar, onEdicaoConcluida }) {
-  const [descricao, setDescricao] = useState('');
-  const [valor, setValor] = useState('');
-  const [dataTransacao, setDataTransacao] = useState('');
-  const [categoriaId, setCategoriaId] = useState('');
-  const [tipoTransacao, setTipoTransacao] = useState('despesa');
-  const [tipoDespesa, setTipoDespesa] = useState('fixa');
-  const [dataVencimento, setDataVencimento] = useState('');
-  const [precisaAviso, setPrecisaAviso] = useState(false);
-  const [categorias, setCategorias] = useState([]);
-  const { showNotification } = useNotification();
+function FormularioEditarTransacao({ transacaoParaEditar, onEdicaoConcluida, categorias }) {
+    const [descricao, setDescricao] = useState('');
+    const [valor, setValor] = useState('');
+    const [dataTransacao, setDataTransacao] = useState('');
+    const [categoriaId, setCategoriaId] = useState('');
+    const [tipoTransacao, setTipoTransacao] = useState('despesa');
+    const [tipoDespesa, setTipoDespesa] = useState('fixa');
+    const [dataVencimento, setDataVencimento] = useState('');
+    const [precisaAviso, setPrecisaAviso] = useState(false);
+    const { showNotification } = useNotification();
 
-  useEffect(() => {
-    axios.get('/categorias')
-      .then(response => setCategorias(response.data))
-      .catch(e => console.error('Erro ao buscar as Categorias: ', e));
-  }, []);
-  
-  useEffect(() => {
-    if (transacaoParaEditar) {
-      setDescricao(transacaoParaEditar.descricao);
-      setValor(transacaoParaEditar.valor);
-      setDataTransacao(transacaoParaEditar.data_transacao ? new Date(transacaoParaEditar.data_transacao).toISOString().split('T')[0] : '');
-      setCategoriaId(transacaoParaEditar.categoria_id || '');
-      setTipoTransacao(transacaoParaEditar.tipo_transacao);
-      setTipoDespesa(transacaoParaEditar.tipo_despesa || 'fixa');
-      setDataVencimento(transacaoParaEditar.data_vencimento ? new Date(transacaoParaEditar.data_vencimento).toISOString().split('T')[0] : '');
-      setPrecisaAviso(transacaoParaEditar.precisa_aviso || false);
-    }
-  }, [transacaoParaEditar]);
+    useEffect(() => {
+        if (transacaoParaEditar) {
+            setDescricao(transacaoParaEditar.descricao);
+            setValor(transacaoParaEditar.valor);
+            setDataTransacao(transacaoParaEditar.data_transacao ? new Date(transacaoParaEditar.data_transacao).toISOString().split('T')[0] : '');
+            setCategoriaId(transacaoParaEditar.categoria_id || '');
+            setTipoTransacao(transacaoParaEditar.tipo_transacao);
+            setTipoDespesa(transacaoParaEditar.tipo_despesa || 'fixa');
+            setDataVencimento(transacaoParaEditar.data_vencimento ? new Date(transacaoParaEditar.data_vencimento).toISOString().split('T')[0] : '');
+            setPrecisaAviso(transacaoParaEditar.precisa_aviso || false);
+        }
+    }, [transacaoParaEditar]);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const transacaoAtualizada = {
-      descricao, valor: parseFloat(valor), data_transacao: dataTransacao,
-      categoria_id: parseInt(categoriaId), tipo_transacao: tipoTransacao,
-      tipo_despesa: tipoTransacao === 'despesa' ? tipoDespesa : null,
-      data_vencimento: (tipoTransacao === 'despesa' && dataVencimento) ? dataVencimento : null,
-      precisa_aviso: tipoTransacao === 'despesa' ? precisaAviso : false,
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const transacaoAtualizada = {
+            descricao, valor: parseFloat(valor), data_transacao: dataTransacao,
+            categoria_id: parseInt(categoriaId), tipo_transacao: tipoTransacao,
+            tipo_despesa: tipoTransacao === 'despesa' ? tipoDespesa : null,
+            data_vencimento: (tipoTransacao === 'despesa' && dataVencimento) ? dataVencimento : null,
+            precisa_aviso: tipoTransacao === 'despesa' ? precisaAviso : false,
+        };
+
+        try {
+            // Lógica de atualização com Supabase
+            const { data, error } = await supabase
+                .from('transacoes')
+                .update(transacaoAtualizada)
+                .eq('id', transacaoParaEditar.id)
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            showNotification('Transação atualizada com sucesso!', 'success');
+            onEdicaoConcluida(data);
+        } catch (error) {
+            console.error('Erro ao atualizar transação:', error);
+            showNotification(`Não foi possível atualizar a transação: ${error.message}`, 'error');
+        }
     };
-
-    try {
-      const response = await axios.put(`/transacoes/${transacaoParaEditar.id}`, transacaoAtualizada);
-      showNotification('Transação atualizada com sucesso!', 'success');
-      onEdicaoConcluida(response.data);
-    } catch (error) {
-      console.error('Erro ao atualizar transação:', error);
-      showNotification('Não foi possível atualizar a transação.', 'error');
-    }
-  };
+      
   
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 2 }}>

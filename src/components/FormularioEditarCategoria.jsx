@@ -30,7 +30,6 @@ function FormularioEditarCategoria({ categoriaParaEditar, onEdicaoConcluida }) {
       showNotification('Categoria atualizada com sucesso!', 'success');
       onEdicaoConcluida(data);
     } catch (error) {
-      console.error('Erro ao atualizar categoria:', error);
       showNotification(`Não foi possível atualizar a categoria: ${error.message}`, 'error');
     }
   };

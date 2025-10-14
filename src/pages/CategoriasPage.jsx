@@ -1,7 +1,6 @@
-// src/pages/CategoriasPage.jsx
 import { useState, useEffect, useContext } from 'react';
+import { supabase } from '../supabaseClient';
 import { useUser } from '../contexts/UserContext';
-import { UserContext } from '../contexts/UserContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { Box, Typography, List, ListItem, ListItemText, Paper, CircularProgress, IconButton, Dialog, DialogTitle, DialogContent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,27 +9,26 @@ import CloseIcon from '@mui/icons-material/Close';
 import FormularioCategoria from '../components/FormularioCategoria';
 import FormularioEditarCategoria from '../components/FormularioEditarCategoria';
 import ConfirmationDialog from '../components/ConfirmationDialog';
+import { useNavigate } from 'react-router-dom';
 
 function CategoriasPage() {
-  // O 'categorias' e 'setCategorias' agora vem do contexto global!
-  const { loading, categorias, setCategorias } = useUser();
+  const { usuario, loading, categorias, setCategorias } = useUser();
   const { showNotification } = useNotification();
+  const navigate = useNavigate();
+  
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState(null);
   const [dialogExclusao, setDialogExclusao] = useState({ open: false, id: null });
 
+  useEffect(() => {
+    if (!loading && !usuario) {
+      navigate('/login');
+    }
+  }, [usuario, loading, navigate]);
+
+
   const handleCategoriaAdicionada = (novaCategoria) => {
-    setCategorias(categoriasAtuais => [...categoriasAtuais, novaCategoria]);
-  };
-
-  const handleAbrirModalEdicao = (categoria) => {
-    setCategoriaSelecionada(categoria);
-    setModalEdicaoAberto(true);
-  };
-
-  const handleFecharModalEdicao = () => {
-    setModalEdicaoAberto(false);
-    setCategoriaSelecionada(null);
+    setCategorias(categoriasAtuais => [...categoriasAtuais, novaCategoria].sort((a, b) => a.nome.localeCompare(b.nome)));
   };
 
   const handleEdicaoConcluida = (catAtualizada) => {
@@ -41,14 +39,8 @@ function CategoriasPage() {
   const handleConfirmarExclusao = async () => {
     const idParaDeletar = dialogExclusao.id;
     try {
-      // Lógica de exclusão com Supabase
-      const { error } = await supabase
-        .from('categorias')
-        .delete()
-        .eq('id', idParaDeletar);
-
+      const { error } = await supabase.from('categorias').delete().eq('id', idParaDeletar);
       if (error) throw error;
-      
       setCategorias(catsAtuais => catsAtuais.filter(c => c.id !== idParaDeletar));
       showNotification('Categoria excluída com sucesso!', 'success');
     } catch (error) {
@@ -57,74 +49,63 @@ function CategoriasPage() {
       setDialogExclusao({ open: false, id: null });
     }
   };
+  
+  const handleAbrirModalEdicao = (categoria) => {
+    setCategoriaSelecionada(categoria);
+    setModalEdicaoAberto(true);
+  };
+  const handleFecharModalEdicao = () => {
+    setModalEdicaoAberto(false);
+    setCategoriaSelecionada(null);
+  };
+  const handleAbrirDialogoExclusao = (id) => {
+    setDialogExclusao({ open: true, id: id });
+  };
+  const handleFecharDialogoExclusao = () => {
+    setDialogExclusao({ open: false, id: null });
+  };
 
-  if (loading) {
+
+  if (loading) { 
     return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-            <CircularProgress /> <Typography ml={2}>Carregando...</Typography>
-        </Box>
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress /> <Typography ml={2}>Carregando...</Typography>
+      </Box>
     );
   }
 
   return (
     <Box>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Gerenciar Categorias
-      </Typography>
+      <Typography variant="h4" component="h1" gutterBottom>Gerenciar Categorias</Typography>
 
       <Paper elevation={3} sx={{ p: 2, mt: 4, maxWidth: '600px' }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Adicionar Nova Categoria
-        </Typography>
+        <Typography variant="h5" component="h2" gutterBottom>Adicionar Nova Categoria</Typography>
         <FormularioCategoria onCategoriaAdicionada={handleCategoriaAdicionada} />
       </Paper>
 
       <Paper elevation={3} sx={{ p: 2, mt: 4 }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Categorias Existentes
-        </Typography>
+        <Typography variant="h5" component="h2" gutterBottom>Categorias Existentes</Typography>
         <List>
           {categorias.map(cat => (
-            <ListItem 
-              key={cat.id} 
-              divider
+            <ListItem key={cat.id} divider
               secondaryAction={
                 <>
-                  <IconButton edge="end" aria-label="edit" onClick={() => handleAbrirModalEdicao(cat)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton edge="end" aria-label="delete" onClick={() => handleAbrirDialogoExclusao(cat.id)}>
-                    <DeleteIcon />
-                  </IconButton>
+                  <IconButton edge="end" aria-label="edit" onClick={() => handleAbrirModalEdicao(cat)}><EditIcon /></IconButton>
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleAbrirDialogoExclusao(cat.id)}><DeleteIcon /></IconButton>
                 </>
-              }
-            >
-              <ListItemText 
-                primary={cat.nome} 
-                secondary={cat.tipo.charAt(0).toUpperCase() + cat.tipo.slice(1)} 
-              />
+              }>
+              <ListItemText primary={cat.nome} secondary={cat.tipo.charAt(0).toUpperCase() + cat.tipo.slice(1)} />
             </ListItem>
           ))}
         </List>
       </Paper>
       
       <Dialog open={modalEdicaoAberto} onClose={handleFecharModalEdicao} fullWidth maxWidth="sm">
-        <DialogTitle>
-          Editar Categoria
-          <IconButton onClick={handleFecharModalEdicao} sx={{ position: 'absolute', right: 8, top: 8 }}><CloseIcon /></IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <FormularioEditarCategoria categoriaParaEditar={categoriaSelecionada} onEdicaoConcluida={handleEdicaoConcluida} />
-        </DialogContent>
+        <DialogTitle>Editar Categoria<IconButton onClick={handleFecharModalEdicao} sx={{ position: 'absolute', right: 8, top: 8 }}><CloseIcon /></IconButton></DialogTitle>
+        <DialogContent><FormularioEditarCategoria categoriaParaEditar={categoriaSelecionada} onEdicaoConcluida={handleEdicaoConcluida} /></DialogContent>
       </Dialog>
       
-      <ConfirmationDialog
-        open={dialogExclusao.open}
-        onClose={handleFecharDialogoExclusao}
-        onConfirm={handleConfirmarExclusao}
-        title="Confirmar Exclusão"
-        message="Tem certeza que deseja excluir esta categoria? As transações associadas a ela ficarão sem categoria."
-      />
+      <ConfirmationDialog open={dialogExclusao.open} onClose={handleFecharDialogoExclusao} onConfirm={handleConfirmarExclusao} title="Confirmar Exclusão" message="Tem certeza?" />
     </Box>
   );
 }
