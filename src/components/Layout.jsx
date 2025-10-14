@@ -7,6 +7,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import CategoryIcon from '@mui/icons-material/Category';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useUser } from '../contexts/UserContext'; // Usando nosso hook
 
 const drawerWidth = 240;
@@ -55,7 +56,8 @@ const handleLogout = async () => {
         <List>
           {[
             { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-            { text: 'Categorias', icon: <CategoryIcon />, path: '/categorias' }
+            { text: 'Categorias', icon: <CategoryIcon />, path: '/categorias' },
+            { text: 'Lembretes', icon: <NotificationsIcon />, path: '/lembretes' }
           ].map((item) => (
             <ListItem key={item.text} disablePadding>
               <ListItemButton component={Link} to={item.path} sx={{ '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.08)' }, color: '#d1d5db' }}>

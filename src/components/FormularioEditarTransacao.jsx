@@ -10,8 +10,6 @@ function FormularioEditarTransacao({ transacaoParaEditar, onEdicaoConcluida, cat
     const [categoriaId, setCategoriaId] = useState('');
     const [tipoTransacao, setTipoTransacao] = useState('despesa');
     const [tipoDespesa, setTipoDespesa] = useState('fixa');
-    const [dataVencimento, setDataVencimento] = useState('');
-    const [precisaAviso, setPrecisaAviso] = useState(false);
     const { showNotification } = useNotification();
 
     useEffect(() => {
@@ -22,8 +20,6 @@ function FormularioEditarTransacao({ transacaoParaEditar, onEdicaoConcluida, cat
             setCategoriaId(transacaoParaEditar.categoria_id || '');
             setTipoTransacao(transacaoParaEditar.tipo_transacao);
             setTipoDespesa(transacaoParaEditar.tipo_despesa || 'fixa');
-            setDataVencimento(transacaoParaEditar.data_vencimento ? new Date(transacaoParaEditar.data_vencimento).toISOString().split('T')[0] : '');
-            setPrecisaAviso(transacaoParaEditar.precisa_aviso || false);
         }
     }, [transacaoParaEditar]);
 
@@ -33,8 +29,6 @@ function FormularioEditarTransacao({ transacaoParaEditar, onEdicaoConcluida, cat
             descricao, valor: parseFloat(valor), data_transacao: dataTransacao,
             categoria_id: parseInt(categoriaId), tipo_transacao: tipoTransacao,
             tipo_despesa: tipoTransacao === 'despesa' ? tipoDespesa : null,
-            data_vencimento: (tipoTransacao === 'despesa' && dataVencimento) ? dataVencimento : null,
-            precisa_aviso: tipoTransacao === 'despesa' ? precisaAviso : false,
         };
 
         try {
@@ -87,8 +81,6 @@ function FormularioEditarTransacao({ transacaoParaEditar, onEdicaoConcluida, cat
                       <MenuItem value="unica">Única</MenuItem>
                   </Select>
               </FormControl>
-              <TextField label="Data de Vencimento" type="date" size="small" variant='outlined' fullWidth value={dataVencimento} onChange={(e) => setDataVencimento(e.target.value)} InputLabelProps={{ shrink: true }}/>
-              <FormControlLabel control={ <Checkbox checked={precisaAviso} onChange={(e) => setPrecisaAviso(e.target.checked)} /> } label="Receber aviso para esta despesa" sx={{ gridColumn: 'span 2' }}/>
           </>
       )}
       <Button type='submit' variant="contained" sx={{ gridColumn: 'span 2'}}>Salvar Alterações</Button>

@@ -10,8 +10,7 @@ function FormularioTransacao({ onTransacaoAdicionada, categorias }) {
     const [categoriaId, setCategoriaId] = useState('');
     const [tipoTransacao, setTipoTransacao] = useState('despesa');
     const [tipoDespesa, setTipoDespesa] = useState('fixa');
-    const [dataVencimento, setDataVencimento] = useState('');
-    const [precisaAviso, setPrecisaAviso] = useState(false);
+
     
     const { showNotification } = useNotification();
 
@@ -24,8 +23,6 @@ function FormularioTransacao({ onTransacaoAdicionada, categorias }) {
             categoria_id: parseInt(categoriaId),
             tipo_transacao: tipoTransacao,
             tipo_despesa: tipoTransacao === 'despesa' ? tipoDespesa : null,
-            data_vencimento: (tipoTransacao === 'despesa' && dataVencimento) ? dataVencimento : null,
-            precisa_aviso: tipoTransacao === 'despesa' ? precisaAviso : false,
         };
 
         try {
@@ -43,7 +40,7 @@ function FormularioTransacao({ onTransacaoAdicionada, categorias }) {
 
             // Limpando o formulário
             setDescricao(''); setValor(''); setDataTransacao(''); setCategoriaId('');
-            setTipoTransacao('despesa'); setTipoDespesa('fixa'); setDataVencimento(''); setPrecisaAviso(false);
+
         } catch (error) {
             console.error('Erro ao criar transação:', error);
             showNotification(`Erro ao criar transação: ${error.message}`, 'error');
@@ -108,28 +105,6 @@ function FormularioTransacao({ onTransacaoAdicionada, categorias }) {
                             <MenuItem value="unica">Única</MenuItem>
                         </Select>
                     </FormControl>
-
-                    <TextField
-                        label="Data de Vencimento"
-                        type="date"
-                        size="small"
-                        variant='outlined'
-                        fullWidth
-                        value={dataVencimento}
-                        onChange={(e) => setDataVencimento(e.target.value)}
-                        InputLabelProps={{ shrink: true }}
-                    />
-
-                    <FormControlLabel
-                        control={
-                            <Checkbox 
-                                checked={precisaAviso} 
-                                onChange={(e) => setPrecisaAviso(e.target.checked)} // Checkbox usa 'e.target.checked'
-                            />
-                        }
-                        label="Receber aviso para esta despesa"
-                        sx={{ gridColumn: 'span 2' }} // Ocupa a largura total
-                    />
                 </>
             )}
 

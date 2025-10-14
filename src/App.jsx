@@ -4,6 +4,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import CategoriasPage from './pages/CategoriasPage';
+import LembretesPage from './pages/LembretesPage';
 import Layout from './components/Layout';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
                   <Routes>
                     <Route path="/" element={<DashboardPage />} />
                     <Route path="/categorias" element={<CategoriasPage />} />
+                    <Route path="/lembretes" element={<LembretesPage />} />
                   </Routes>
                 </Layout>
               } 
