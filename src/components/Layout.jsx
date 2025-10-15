@@ -45,9 +45,9 @@ const handleLogout = async () => {
 
         {usuario && (
           <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar src={usuario.foto_url} alt={usuario.nome} />
+            <Avatar src={usuario.user_metadata.picture} alt={usuario.user_metadata.full_name} />
             <Typography variant="subtitle1" sx={{ color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {usuario.nome}
+              {usuario.user_metadata.full_name}
             </Typography>
           </Box>
         )}
