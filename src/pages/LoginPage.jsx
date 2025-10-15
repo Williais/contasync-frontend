@@ -12,7 +12,7 @@ function LoginPage() {
       // A função do Supabase que cuida de todo o fluxo de login com o Google
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {redirectTo: `${window.location.origin}/auth/callback`}
+        options: {redirectTo: `https://contasync-xi.vercel.app/auth/callback`}
       });
       if (error) throw error;
     } catch (error) {
