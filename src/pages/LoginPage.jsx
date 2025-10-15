@@ -1,4 +1,4 @@
-// src/pages/LoginPage.jsx
+
 import { supabase } from '../supabaseClient';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -12,6 +12,7 @@ function LoginPage() {
       // A função do Supabase que cuida de todo o fluxo de login com o Google
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
+        options: {redirectTo: `${window.location.origin}/auth/callback`}
       });
       if (error) throw error;
     } catch (error) {
@@ -19,8 +20,6 @@ function LoginPage() {
     }
   };
   return (
-    // Box é como uma 'div' superpoderosa para layout.
-    // 'display: flex', 'alignItems', etc., são propriedades (props) que controlam o CSS.
     <Box 
       display="flex" 
       alignItems="center" 
@@ -29,25 +28,21 @@ function LoginPage() {
       bgcolor="#f5f5f5"
     >
       <Box textAlign="center" p={4} bgcolor="white" borderRadius={2} boxShadow={3}>
-        {/* Typography é usado para todos os textos, com estilos pré-definidos */}
+
         <Typography variant="h4" component="h1" gutterBottom>
           ContaSync
         </Typography>
         <Typography variant="subtitle1" color="textSecondary" gutterBottom>
           Seu gestor financeiro pessoal.
         </Typography>
-        
-        {/* O componente Button já vem com design e animações.
-            'variant="contained"' dá o estilo de botão principal.
-            'startIcon' coloca um ícone no início do botão.
-        */}
+
         <Button 
           variant="contained" 
           color="primary" 
           size="large"
           startIcon={<GoogleIcon />}
-          onClick={handleLogin} // Usamos 'href' para que ele funcione como um link
-          sx={{ mt: 4 }} // 'sx' é uma prop para adicionar CSS customizado facilmente
+          onClick={handleLogin}
+          sx={{ mt: 4 }}
         >
           Entrar com Google
         </Button>

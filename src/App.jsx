@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import CategoriasPage from './pages/CategoriasPage';
 import LembretesPage from './pages/LembretesPage';
+import AuthCallback from './pages/AuthCallback';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <UserProvider>
           <Routes>
             {/* A rota de Login continua pública */}
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/login" element={<LoginPage />} />
             
             {/* Todas as outras rotas agora são protegidas pelo "porteiro" */}
