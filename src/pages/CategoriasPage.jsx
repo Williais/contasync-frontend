@@ -9,22 +9,16 @@ import CloseIcon from '@mui/icons-material/Close';
 import FormularioCategoria from '../components/FormularioCategoria';
 import FormularioEditarCategoria from '../components/FormularioEditarCategoria';
 import ConfirmationDialog from '../components/ConfirmationDialog';
-import { useNavigate } from 'react-router-dom';
+
 
 function CategoriasPage() {
   const { usuario, loading, categorias, setCategorias } = useUser();
   const { showNotification } = useNotification();
-  const navigate = useNavigate();
+
   
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState(null);
   const [dialogExclusao, setDialogExclusao] = useState({ open: false, id: null });
-
-  useEffect(() => {
-    if (!loading && !usuario) {
-      navigate('/login');
-    }
-  }, [usuario, loading, navigate]);
 
 
   const handleCategoriaAdicionada = (novaCategoria) => {
