@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useContext } from 'react';
 import { supabase } from '../supabaseClient';
-import axios from '../api/axios.js'
 import { UserContext, useUser } from '../contexts/UserContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { 

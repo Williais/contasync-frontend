@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from '../supabaseClient'; // Usa Supabase
+import { supabase } from '../supabaseClient';
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel, Checkbox, FormControlLabel } from '@mui/material';
 import { useNotification } from '../contexts/NotificationContext';
 

@@ -1,4 +1,3 @@
-// src/components/FormularioEditarLembrete.jsx
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Button, TextField, Box, Select, MenuItem, FormControl, InputLabel, Grid } from '@mui/material';

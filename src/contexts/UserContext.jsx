@@ -1,9 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { supabase } from '../supabaseClient';
-import axios from 'axios'; // Mantenha o axios para chamadas de dados
-
-// Configuração global do axios (se você moveu para um arquivo api/axios.js, melhor ainda)
-axios.defaults.withCredentials = true; 
 
 export const UserContext = createContext(null);
 
@@ -21,12 +17,11 @@ export function UserProvider({ children }) {
     };
     getInitialSession();
 
-    // Ouvinte para futuras mudanças (login, logout)
+    // Ouvinte para mudanças (login, logout)
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('EVENTO DE AUTENTICAÇÃO DO SUPABASE:', event); // <-- NOSSO DETETIVE
-        console.log('SESSÃO RECEBIDA:', session); // <-- NOSSO DETETIVE
-
+        console.log('EVENTO DE AUTENTICAÇÃO DO SUPABASE:', event);
+        console.log('SESSÃO RECEBIDA:', session); 
         const user = session?.user ?? null;
         setUsuario(user);
 
