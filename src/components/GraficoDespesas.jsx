@@ -48,11 +48,13 @@ function GraficoDespesas({ transacoes, categorias }) {
           data,
           backgroundColor: [ // Paleta de cores para o gráfico
             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-            '#9966FF', '#FF9F40', '#C9CBCF', '#4D5360'
+            '#9966FF', '#FF9F40', '#C9CBCF', '#4D5360',
+            '#9b2323', '#5f6db0', '#9e4624', '#002d04'
           ],
           hoverBackgroundColor: [
             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-            '#9966FF', '#FF9F40', '#C9CBCF', '#4D5360'
+            '#9966FF', '#FF9F40', '#C9CBCF', '#4D5360',
+            '#9b2323', '#5f6db0', '#9e4624', '#002d04'
           ],
           borderWidth: 1,
         },

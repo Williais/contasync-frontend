@@ -25,7 +25,7 @@ function GraficoLinhaEvolucao({ transacoes, categorias }) {
 
     const labels = Object.keys(dadosAgrupados); // Agora que agrupamos a partir de uma lista ordenada, as chaves estarão na ordem correta.
     const todasCategorias = [...new Set(despesasOrdenadas.map(d => categorias.find(c => c.id === d.categoria_id)?.nome || 'Sem Categoria'))];
-    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#9b2323', '#5f6db0', '#9e4624', '#002d04'];
 
     const datasets = todasCategorias.map((categoria, index) => ({
       label: categoria,
